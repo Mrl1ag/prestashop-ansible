@@ -1,0 +1,27 @@
+---
+prestashop_version: 1.7.8.0
+prestashop_url_download: "https://download.prestashop.com/download/releases/prestashop_1.7.8.0.zip"
+
+prestashop_root_path: "/var/www/dandara.net/prestashop"
+
+prestashop_domain: "loja.dandara.net/"
+prestashop_db_create: 1
+prestashop_db_clear: 1
+prestashop_db_server: "localhost"
+prestashop_db_name: "prestashop"
+prestashop_db_user: "prestashopuser"
+prestashop_db_password: "M4ri4l4ab123*"
+prestashop_db_engine: "mysql"
+prestashop_db_prefix: "ps_"
+prestashop_language: "pt-br"
+prestashop_country: "br"
+prestashop_timezone: "America/Sao Paulo"
+prestashop_newsletter: 0
+
+prestashop_firstname: "Maria"
+prestashop_lastname: "Lab"
+prestashop_password: "M4ri4l4ab123*"
+prestashop_email: "yakecan_nacekay@riseup.net"
+
+prestashop_admin_folder_name: "admindandara"
+prestashop_check_file_name: "prestashop-installed.txt"
