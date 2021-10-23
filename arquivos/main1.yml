@@ -1,4 +1,8 @@
 ---
+- name: Instalação de dependencias PHP
+  apt: ['php-common', 'php-mbstring', 'php-gd', 'php-intl', 'php-xml', 'php-mysql', 'php-zip', 'php-curl', 'php-xmlrpc', 'curl', 'libapache2-mod-php7.4', 'php-fpm' , 'php7.4-fpm']
+
+
 - name: Verificar instalação
   stat:
     path: "{{ prestashop_root_path }}/{{ prestashop_check_file_name }}"
@@ -30,6 +34,10 @@
     owner: www-data
     group: www-data
   when: prestashop_status.stat.exists == false
+
+
+-name: Testa o sintax, reinicia o Apache , habilita o site
+ apt: ['sudo apache2ctl configtest', 'sudo a2enmod rewrite headers proxy_fcgi setenvif', 'sudo a2enconf php7.4-fpm', 'sudo a2ensite loja.dandara.net.conf', 'sudo systemctl reload apache2']
 
 - name: Instalamos Prestashop pelo terminal.
   command: "php7.1 index_cli.php --domain={{ prestashop_domain }} --db_create={{ prestashop_db_create }} --db_clear={{ prestashop_db_clear }} --db_server={{ prestashop_db_server }} --db_name={{ prestashop_db_name }} --db_user={{ prestashop_db_user }} --db_password={{ prestashop_db_password }} --engine={{ prestashop_db_engine }} --prefix={{ prestashop_db_prefix }} --language={{ prestashop_language }} --country={{ prestashop_country }} --timezone={{ prestashop_timezone }} --firstname={{ prestashop_firstname }} --lastname={{ prestashop_lastname }} --password={{ prestashop_password }} --email={{ prestashop_email }} --newsletter={{ prestashop_newsletter }}"
