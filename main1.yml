@@ -3,6 +3,7 @@
   sudo: yes 
   vars_files:
   - Banco_prestashop.yml
+  #become: true
   tasks:
   
     - name: PHP
@@ -16,49 +17,85 @@
 
     - name: Criando o diretorio do PrestaShop.
       file:
-        path: "/var/www/dandara.net/prestashop"
+        path: "{{prestashop_root_path}}"
         owner: www-data
         group: www-data
         mode: 0755
         state: directory
       when: prestashop_status.stat.exists == false
 
+    
     - name: Baixar Prestashop.
       get_url:
-        url: "{{ prestashop_url_download }}"
-        dest: "{{ prestashop_root_path }}/prestashop.zip"
-        #remote_src: true
-        #owner: www-data
-        #group: www-data
-      when: prestashop_status.stat.exists == false
+         url: "{{ prestashop_url_download }}"
+        #dest: "/var/www/dandara.net/prestashop/prestashop.zip"
+         dest: "{{prestashop_root_path}}"
+         remote_src: true
+         owner: www-data
+         group: www-data
+      #when: prestashop_status.stat.exists == false
 
     - name: Descomprimindo zip da Prestashop.
+     #shell: unzip /var/www/dandara.net/prestashop/prestashop.zip -d 
       unarchive:
-        src: "{{ prestashop_root_path }}/prestashop.zip"
+        src: "{{prestashop_root_path}}/prestashop_1.7.8.0.zip"
         dest: "{{ prestashop_root_path }}"
-        #remote_src: true
+        remote_src: true
         owner: www-data
         group: www-data
       when: prestashop_status.stat.exists == false
 
-    - name: configtest
-      apache2_module: 
-        name: "configtest"
+    - name: Descomprimindo zip da Prestashop segunda vez.
+      unarchive:
+        src: "{{prestashop_root_path}}/prestashop.zip"
+        dest: "{{ prestashop_root_path }}"
+        remote_src: true
+        owner: www-data
+        group: www-data
+      when: prestashop_status.stat.exists == false
+    
 
-      #       Testa o sintax, reinicia o Apache , habilita o site
-      #apt: ['sudo apache2ctl configtest', 'sudo a2enmod rewrite headers proxy_fcgi setenvif', 'sudo a2enconf php7.4-fpm', 'sudo a2ensite loja.dandara.net.conf', 'sudo systemctl reload apache2']
+    - name: Checando se configuração é válida
+      command: apache2ctl configtest
+      register: result
+      ignore_errors: True
+    
+    - name: Enable mod_rewrite
+      apache2_module:
+        state: present
+        name: rewrite
+        force: true
+        #ignore_configcheck: true
+
+    - name: enable php7.4-fpm
+      command: a2enconf php7.4-fpm
+      #shell : a2enconf php7.4-fpm
+  
+    - name: habilitando o dominio loja.dandara.net.conf
+      command: a2ensite loja.dandara.net.conf
+
+    - name: reload apache2'
+      command: systemctl reload apache2
 
     - name: Instalamos Prestashop pelo terminal.
-      command: "php7.1 index_cli.php --domain={{ prestashop_domain }} --db_create={{ prestashop_db_create }} --db_clear={{ prestashop_db_clear }} --db_server={{ prestashop_db_server }} --db_name={{ prestashop_db_name }} --db_user={{ prestashop_db_user }} --db_password={{ prestashop_db_password }} --engine={{ prestashop_db_engine }} --prefix={{ prestashop_db_prefix }} --language={{ prestashop_language }} --country={{ prestashop_country }} --timezone={{ prestashop_timezone }} --firstname={{ prestashop_firstname }} --lastname={{ prestashop_lastname }} --password={{ prestashop_password }} --email={{ prestashop_email }} --newsletter={{ prestashop_newsletter }}"
+      command: "php7.1 index_cli.php --domain={{ prestashop_domain }} --db_create={{ prestashop_db_create }} 
+                --db_clear={{ prestashop_db_clear }} --db_server={{ prestashop_db_server }} 
+                --db_name={{ prestashop_db_name }} --db_user={{ prestashop_db_user }} 
+                --db_password={{ prestashop_db_password }} --engine={{ prestashop_db_engine }} 
+                --prefix={{ prestashop_db_prefix }} --language={{ prestashop_language }} 
+                --country={{ prestashop_country }} --timezone={{ prestashop_timezone }} 
+                --firstname={{ prestashop_firstname }} --lastname={{ prestashop_lastname }} 
+                --password={{ prestashop_password }} --email={{ prestashop_email }} 
+                --newsletter={{ prestashop_newsletter }}"
       args:
         chdir: "{{ prestashop_root_path }}/install"
-        when: prestashop_status.stat.exists == false
+      when: prestashop_status.stat.exists == false
 
-    - name: Renombramos el directorio admin de PrestaShop.
+    - name: Renomeando o diretorio admin da PrestaShop.
       command: "mv {{ prestashop_root_path }}/admin {{ prestashop_root_path }}/{{ prestashop_admin_folder_name }}"
       when: prestashop_status.stat.exists == false
 
-    - name: Creamos archivo que indica que PrestsSop está instalado.
+    - name: Creamos arquivo que indica que PrestsSop está instalado.
       copy:
         content: "PrestaShop {{ prestashop_version }} instalado, não apagar esse arquivo, senao ansible reinstalar PrestaShop "
         dest: "{{ prestashop_root_path }}/{{ prestashop_check_file_name }}"
