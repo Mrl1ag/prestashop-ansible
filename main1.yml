@@ -1,9 +1,9 @@
 ---
 - hosts: all
-  sudo: yes 
+  # sudo: yes 
   vars_files:
   - Banco_prestashop.yml
-  #become: true
+  become: true
   tasks:
   
     - name: PHP
@@ -27,13 +27,13 @@
     
     - name: Baixar Prestashop.
       get_url:
-         url: "{{ prestashop_url_download }}"
+        url: "{{prestashop_url_download}}"
         #dest: "/var/www/dandara.net/prestashop/prestashop.zip"
-         dest: "{{prestashop_root_path}}"
-         remote_src: true
-         owner: www-data
-         group: www-data
-      #when: prestashop_status.stat.exists == false
+        dest: "{{prestashop_root_path}}"
+        #remote_src: true
+        owner: www-data
+        group: www-data
+      when: prestashop_status.stat.exists == false
 
     - name: Descomprimindo zip da Prestashop.
      #shell: unzip /var/www/dandara.net/prestashop/prestashop.zip -d 
@@ -78,7 +78,7 @@
       command: systemctl reload apache2
 
     - name: Instalamos Prestashop pelo terminal.
-      command: "php7.1 index_cli.php --domain={{ prestashop_domain }} --db_create={{ prestashop_db_create }} 
+      command: "php7.4 index_cli.php --domain={{ prestashop_domain }} --db_create={{ prestashop_db_create }} 
                 --db_clear={{ prestashop_db_clear }} --db_server={{ prestashop_db_server }} 
                 --db_name={{ prestashop_db_name }} --db_user={{ prestashop_db_user }} 
                 --db_password={{ prestashop_db_password }} --engine={{ prestashop_db_engine }} 
@@ -95,8 +95,8 @@
       command: "mv {{ prestashop_root_path }}/admin {{ prestashop_root_path }}/{{ prestashop_admin_folder_name }}"
       when: prestashop_status.stat.exists == false
 
-    - name: Creamos arquivo que indica que PrestsSop está instalado.
+    - name: Criamos arquivo que indica que PrestsSop está instalado.
       copy:
-        content: "PrestaShop {{ prestashop_version }} instalado, não apagar esse arquivo, senao ansible reinstalar PrestaShop "
+        content: "PrestaShop {{ prestashop_version }} instalado, não apagar esse arquivo, senao ansible reinstala PrestaShop "
         dest: "{{ prestashop_root_path }}/{{ prestashop_check_file_name }}"
       when: prestashop_status.stat.exists == false
