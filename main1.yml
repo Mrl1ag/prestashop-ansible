@@ -100,3 +100,8 @@
         content: "PrestaShop {{ prestashop_version }} instalado, não apagar esse arquivo, senao ansible reinstala PrestaShop "
         dest: "{{ prestashop_root_path }}/{{ prestashop_check_file_name }}"
       when: prestashop_status.stat.exists == false
+    
+    - name: Deletar diretorio install
+      file:
+        path: "/var/www/dandara.net/prestashop/install"
+        state: absent
