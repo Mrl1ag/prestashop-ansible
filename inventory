@@ -1,1 +1,1 @@
-37.218.241.148 ansible_user=maria ansible_password=marialab
+37.218.241.148 ansible_user=[username] ansible_password=[password]
